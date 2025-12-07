@@ -1,0 +1,1602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Resume Builder Pro</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --dark: #0f172a;
+            --light: #f3f4f6;
+            --text: #0f172a;
+            --text-muted: #6b7280;
+            --border: #e5e7eb;
+            --student: #8b5cf6;
+            --pro: #ec4899;
+        }
+
+        * { margin:0; padding:0; box-sizing:border-box; }
+
+        body {
+            font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+            background: radial-gradient(circle at top left,#0f172a 0,#020617 45%,#111827 100%);
+            color:var(--text);
+            height:100vh;
+            overflow:hidden;
+        }
+
+        /* AUTH */
+
+        #authScreen {
+            display:flex; justify-content:center; align-items:center;
+            height:100vh;
+            background:radial-gradient(circle at top left,#0f172a 0,#020617 45%,#111827 100%);
+        }
+
+        .auth-panel {
+            background:rgba(15,23,42,0.98);
+            border-radius:18px;
+            padding:32px;
+            width:100%;
+            max-width:430px;
+            box-shadow:0 24px 80px rgba(0,0,0,0.65);
+            border:1px solid rgba(148,163,184,0.3);
+            color:#e5e7eb;
+        }
+
+        .auth-panel h1 {
+            font-size:26px;
+            margin-bottom:4px;
+            font-weight:800;
+            color:#e5e7eb;
+        }
+
+        .auth-panel p {
+            color:#9ca3af;
+            margin-bottom:22px;
+            font-size:13px;
+        }
+
+        .auth-tabs {
+            display:flex; gap:8px; margin-bottom:18px;
+            background:rgba(15,23,42,0.9);
+            padding:4px;
+            border-radius:999px;
+        }
+
+        .auth-tab {
+            flex:1; padding:8px 0;
+            border:none; cursor:pointer;
+            border-radius:999px;
+            font-weight:600; font-size:13px;
+            background:transparent;
+            color:#9ca3af;
+            transition:all .2s;
+        }
+
+        .auth-tab.active {
+            background:linear-gradient(135deg,#3b82f6,#6366f1);
+            color:white;
+        }
+
+        .form-group { margin-bottom:14px; }
+
+        .label {
+            display:block; font-weight:600; margin-bottom:5px;
+            font-size:12px; color:#e5e7eb;
+        }
+
+        .input, select {
+            width:100%;
+            padding:10px 11px;
+            border-radius:8px;
+            border:1px solid #1f2937;
+            background:#020617;
+            color:#e5e7eb;
+            font-size:13px;
+        }
+
+        .input:focus, select:focus {
+            outline:none;
+            border-color:#3b82f6;
+            box-shadow:0 0 0 1px rgba(59,130,246,0.8);
+        }
+
+        .textarea {
+            width:100%; padding:10px 11px;
+            border-radius:8px;
+            border:1px solid #1f2937;
+            background:#020617;
+            color:#e5e7eb;
+            font-size:13px;
+            resize:vertical;
+        }
+
+        .textarea:focus { outline:none; border-color:#3b82f6; }
+
+        .auth-btn {
+            width:100%; padding:10px;
+            border:none; border-radius:999px;
+            background:linear-gradient(135deg,#3b82f6,#6366f1);
+            color:white; font-weight:700; font-size:13px;
+            cursor:pointer; margin-top:4px;
+        }
+
+        .auth-btn:hover { filter:brightness(1.1); }
+
+        /* ONBOARDING */
+
+        #onboarding {
+            display:none; flex-direction:column; justify-content:center; align-items:center;
+            height:100vh; text-align:center;
+            background:radial-gradient(circle at top left,#0f172a 0,#020617 45%,#111827 100%);
+            opacity:0; transition:opacity .3s;
+        }
+
+        #onboarding.active { display:flex; opacity:1; }
+
+        .onboarding-content h1 {
+            font-size:34px; color:#e5e7eb; margin-bottom:10px; font-weight:800;
+        }
+
+        .onboarding-content p {
+            color:#9ca3af; font-size:14px; margin-bottom:22px;
+        }
+
+        .mode-buttons {
+            display:flex; gap:14px; justify-content:center; flex-wrap:wrap;
+        }
+
+        .mode-btn {
+            padding:12px 24px;
+            border-radius:999px;
+            border:1px solid rgba(148,163,184,0.4);
+            background:rgba(15,23,42,0.9);
+            color:#e5e7eb; font-weight:700; font-size:14px;
+            cursor:pointer;
+        }
+
+        .mode-btn:hover { border-color:#6366f1; }
+
+        /* APP LAYOUT */
+
+        #appContainer {
+            display:none; height:100vh; background:#020617;
+        }
+
+        #appContainer.active {
+            display:grid; grid-template-columns:350px minmax(0,1fr);
+        }
+
+        .editor-panel {
+            background:#020617;
+            color:#e5e7eb;
+            overflow-y:auto;
+            border-right:1px solid #111827;
+            padding:16px 18px 20px;
+        }
+
+        .preview-panel {
+            background:radial-gradient(circle at top,#1e293b 0,#020617 45%);
+            overflow-y:auto;
+            padding:18px;
+            display:flex; justify-content:center; align-items:flex-start;
+        }
+
+        .top-bar {
+            display:flex; justify-content:space-between; align-items:center;
+            margin-bottom:14px;
+        }
+
+        .mode-indicator { font-size:12px; color:#9ca3af; }
+        #modeIndicator { color:#e5e7eb; font-weight:600; }
+
+        #menuBtn {
+            width:34px; height:34px; border-radius:50%;
+            background:linear-gradient(135deg,#3b82f6,#6366f1);
+            border:none; color:white; font-weight:700; font-size:13px; cursor:pointer;
+        }
+
+        .editor-title {
+            font-size:15px; font-weight:700; margin-bottom:10px;
+            color:#e5e7eb;
+        }
+
+        .add-btn {
+            width:100%; padding:8px 10px;
+            border-radius:8px; border:none;
+            background:#111827; color:#e5e7eb;
+            font-size:12px; font-weight:600; cursor:pointer;
+            margin-bottom:8px;
+        }
+        .add-btn:hover { background:#1f2937; }
+
+        .item-card {
+            background:#020617;
+            border-radius:10px;
+            border:1px solid #1f2937;
+            padding:10px;
+            margin-bottom:8px;
+        }
+
+        .item-header { display:flex; gap:6px; margin-bottom:6px; }
+
+        .item-title {
+            flex:1; padding:7px 8px;
+            border-radius:6px; border:none;
+            background:#020617; color:#e5e7eb;
+            font-size:13px; font-weight:600;
+            border:1px solid #1f2937;
+        }
+
+        .delete-btn {
+            padding:6px 9px; border-radius:6px;
+            border:none; cursor:pointer;
+            background:#7f1d1d; color:#fecaca; font-size:11px;
+        }
+
+        .ai-buttons {
+            display:grid; grid-template-columns:repeat(2,minmax(0,1fr));
+            gap:6px; margin-top:10px;
+        }
+
+        .ai-btn {
+            padding:8px 8px; border:none; border-radius:8px;
+            font-size:12px; font-weight:600; cursor:pointer;
+            background:#1d4ed8; color:white;
+        }
+
+        .ai-btn:nth-child(3) { background:#0f766e; }
+        .ai-btn:nth-child(4) { background:#6d28d9; }
+
+        /* PREVIEW */
+
+        .resume-preview {
+            background:white;
+            width:100%; max-width:780px;
+            height:1040px;
+            border-radius:14px;
+            box-shadow:0 20px 60px rgba(0,0,0,0.45);
+            overflow:hidden; position:relative;
+        }
+
+        #previewContent {
+            padding:32px 34px;
+            height:100%;
+            font-size:12px;
+            line-height:1.4;
+            overflow:hidden;
+        }
+
+        .preview-header {
+            border-bottom:2px solid #e5e7eb;
+            padding-bottom:10px;
+            margin-bottom:10px;
+        }
+
+        .preview-name {
+            font-size:24px; font-weight:800;
+            letter-spacing:-0.4px; color:#111827;
+        }
+
+        .preview-role {
+            font-size:12px; font-weight:600; color:#4b5563;
+        }
+
+        .preview-section { margin-bottom:11px; }
+
+        .preview-section h3 {
+            font-size:10px; font-weight:800;
+            letter-spacing:0.12em; text-transform:uppercase;
+            color:#111827; margin-bottom:4px;
+        }
+
+        .skill-tag {
+            display:inline-block;
+            padding:3px 8px;
+            border-radius:999px;
+            background:#e0f2fe;
+            color:#1d4ed8;
+            font-size:10px; font-weight:600;
+            margin:0 4px 4px 0;
+        }
+
+        .preview-item {
+            padding-bottom:6px;
+            margin-bottom:6px;
+            border-bottom:1px solid #e5e7eb;
+        }
+
+        .preview-item:last-child { border-bottom:none; margin-bottom:0; padding-bottom:0; }
+
+        .item-title-preview {
+            font-size:11px; font-weight:700; color:#111827; margin-bottom:2px;
+        }
+
+        .item-desc-preview {
+            font-size:10px; color:#4b5563; line-height:1.45;
+        }
+
+        .score-badge {
+            position:absolute; top:16px; right:18px;
+            width:54px; height:54px; border-radius:50%;
+            display:flex; flex-direction:column; justify-content:center; align-items:center;
+            background:linear-gradient(135deg,#22c55e,#16a34a);
+            color:white; font-size:20px; font-weight:800;
+        }
+
+        .score-label { font-size:9px; font-weight:600; }
+
+        /* MENU & MODALS */
+
+        .menu-overlay {
+            position:fixed; inset:0;
+            background:rgba(15,23,42,0.7);
+            display:none; opacity:0;
+            transition:opacity .2s;
+            z-index:90;
+        }
+        .menu-overlay.active { display:block; opacity:1; }
+
+        .menu-sidebar {
+            position:fixed; top:0; right:-260px;
+            width:260px; height:100vh;
+            background:#020617;
+            border-left:1px solid #111827;
+            box-shadow:-10px 0 30px rgba(0,0,0,0.7);
+            padding:18px;
+            transition:right .3s;
+        }
+
+        .menu-overlay.active .menu-sidebar { right:0; }
+
+        .menu-item {
+            padding:9px 0;
+            border-bottom:1px solid #111827;
+            font-size:13px; font-weight:600;
+            color:#e5e7eb; cursor:pointer;
+        }
+        .menu-item:hover { color:#60a5fa; }
+
+        .profile-modal {
+            position:fixed; inset:0;
+            background:rgba(15,23,42,0.85);
+            display:none; justify-content:center; align-items:center;
+            z-index:95;
+        }
+        .profile-modal.active { display:flex; }
+
+        .profile-panel {
+            background:#020617;
+            border-radius:18px;
+            border:1px solid #1f2937;
+            padding:24px 24px 20px;
+            width:100%;
+            max-width:520px;
+            max-height:90vh;
+            overflow-y:auto;
+            color:#e5e7eb;
+            position:relative;
+        }
+
+        .close-menu {
+            position:absolute; top:14px; right:16px;
+            background:none; border:none; color:#9ca3af;
+            font-size:22px; cursor:pointer;
+        }
+
+        .stat-card {
+            background:#020617;
+            border-radius:12px;
+            border:1px solid #1f2937;
+            padding:14px;
+            text-align:left;
+        }
+
+        .stat-number {
+            font-size:22px; font-weight:800; color:#60a5fa;
+        }
+
+        .stat-label { font-size:11px; color:#9ca3af; font-weight:600; }
+
+        /* FLOATING CHAT */
+
+        .chat-panel {
+            position:fixed;
+            bottom:90px;
+            right:24px;
+            width:340px;
+            height:420px;
+            background:#020617;
+            border-radius:16px;
+            box-shadow:0 18px 40px rgba(15,23,42,0.75);
+            display:none;
+            flex-direction:column;
+            z-index:119;
+            border:1px solid #1f2937;
+        }
+
+        .chat-panel.active { display:flex; }
+
+        .chat-header {
+            padding:12px 14px;
+            border-bottom:1px solid #111827;
+            display:flex; justify-content:space-between; align-items:center;
+            color:#e5e7eb;
+        }
+
+        #chatMessages {
+            flex:1; overflow-y:auto; padding:12px;
+            display:flex; flex-direction:column; gap:8px;
+        }
+
+        .chat-message {
+            padding:8px 10px; border-radius:8px;
+            font-size:12px; line-height:1.4;
+        }
+
+        .chat-message.user {
+            align-self:flex-end;
+            background:#2563eb; color:white;
+            max-width:80%;
+        }
+
+        .chat-message.ai {
+            align-self:flex-start;
+            background:#020617; color:#e5e7eb;
+            border:1px solid #111827;
+            max-width:85%;
+        }
+
+        .chat-input-area {
+            padding:10px 12px;
+            border-top:1px solid #111827;
+            display:flex; gap:8px;
+        }
+
+        #chatFab {
+            position:fixed;
+            bottom:24px; right:24px;
+            width:52px; height:52px;
+            border-radius:50%; border:none;
+            background:linear-gradient(135deg,#3b82f6,#6366f1);
+            color:white; font-size:20px;
+            display:flex; align-items:center; justify-content:center;
+            box-shadow:0 20px 40px rgba(15,23,42,0.85);
+            cursor:pointer; z-index:120;
+        }
+
+        @media (max-width:1024px) {
+            #appContainer.active { grid-template-columns:1fr; }
+            .editor-panel { border-right:none; border-bottom:1px solid #111827; }
+        }
+    </style>
+</head>
+<body>
+    <!-- AUTH -->
+    <div id="authScreen">
+        <div class="auth-panel">
+            <h1>AI Resume Studio</h1>
+            <p>Sign in to create, analyze and export ATS‑ready resumes in minutes.</p>
+            <div class="auth-tabs">
+                <button class="auth-tab active" onclick="switchTab('login')">Login</button>
+                <button class="auth-tab" onclick="switchTab('register')">Register</button>
+            </div>
+
+            <div id="loginForm">
+                <div class="form-group">
+                    <label class="label">Email</label>
+                    <input class="input" id="loginEmail" type="email" placeholder="you@example.com">
+                </div>
+                <button class="auth-btn" onclick="handleLogin()">Login</button>
+            </div>
+
+            <div id="registerForm" style="display:none;">
+                <div class="form-group">
+                    <label class="label">Full Name</label>
+                    <input class="input" id="regName" placeholder="John Doe">
+                </div>
+                <div class="form-group">
+                    <label class="label">Email</label>
+                    <input class="input" id="regEmail" type="email" placeholder="you@example.com">
+                </div>
+                <div class="form-group">
+                    <label class="label">Password</label>
+                    <input class="input" id="regPassword" type="password" placeholder="Min 6 characters">
+                </div>
+                <button class="auth-btn" onclick="handleRegister()">Create Account</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ONBOARDING -->
+    <div id="onboarding">
+        <div class="onboarding-content">
+            <h1>Welcome to AI Resume Studio</h1>
+            <p>Choose how you want to start.</p>
+            <div class="mode-buttons">
+                <button class="mode-btn" onclick="selectMode('student')">🎓 Student / Fresher</button>
+                <button class="mode-btn" onclick="selectMode('professional')">💼 Professional</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- APP -->
+    <div id="appContainer">
+        <!-- LEFT: EDITOR -->
+        <div class="editor-panel">
+            <div class="top-bar">
+                <div class="mode-indicator">
+                    <div style="font-size:11px; color:#9ca3af;">Mode</div>
+                    <div id="modeIndicator">Not selected</div>
+                </div>
+                <button id="menuBtn">JD</button>
+            </div>
+
+            <div class="editor-title" id="editorTitle">👤 Profile</div>
+
+            <div class="form-group">
+                <label class="label">Full Name</label>
+                <input class="input" id="name" placeholder="Your full name">
+            </div>
+            <div class="form-group">
+                <label class="label" id="titleLabel">Professional Title / Target Role</label>
+                <input class="input" id="title" placeholder="Senior Engineer / Software Engineering Intern">
+            </div>
+            <div class="form-group" id="studentGPA" style="display:none;">
+                <label class="label">GPA</label>
+                <input class="input" id="gpa" placeholder="3.85/4.0">
+            </div>
+
+            <div class="form-group">
+                <label class="label">Email</label>
+                <input class="input" id="contactEmail" placeholder="you@example.com">
+            </div>
+            <div class="form-group">
+                <label class="label">Phone</label>
+                <input class="input" id="contactPhone" placeholder="+91 XXXXX XXXXX">
+            </div>
+            <div class="form-group">
+                <label class="label">Location</label>
+                <input class="input" id="contactLocation" placeholder="City, Country">
+            </div>
+            <div class="form-group">
+                <label class="label">GitHub</label>
+                <input class="input" id="contactGithub" placeholder="github.com/username">
+            </div>
+            <div class="form-group">
+                <label class="label">LinkedIn</label>
+                <input class="input" id="contactLinkedin" placeholder="linkedin.com/in/username">
+            </div>
+            <div class="form-group">
+                <label class="label">Profile Image URL</label>
+                <input class="input" id="profileImage" placeholder="https://example.com/photo.jpg">
+            </div>
+
+            <div class="form-group">
+                <label class="label">Professional Summary</label>
+                <textarea class="textarea" id="summary" rows="3" placeholder="2–4 lines that describe who you are, key skills and what you’re looking for."></textarea>
+            </div>
+
+            <button class="add-btn" id="addSkill">+ Add Skill / Project</button>
+            <div id="skillsList"></div>
+
+            <button class="add-btn" id="addExperience">+ Add Experience / Activity</button>
+            <div id="experienceList"></div>
+
+            <button class="add-btn" id="addCertificate">+ Add Certificate</button>
+            <div id="certList"></div>
+
+            <button class="add-btn" id="addAchievement">+ Add Achievement</button>
+            <div id="achList"></div>
+
+            <div class="ai-buttons">
+                <button class="ai-btn" id="aiGenerate"><i class="fas fa-wand-magic-sparkles"></i> Generate</button>
+                <button class="ai-btn" id="aiAnalyze"><i class="fas fa-chart-line"></i> Analyze</button>
+                <button class="ai-btn" id="aiFormat"><i class="fas fa-paintbrush"></i> Format</button>
+                <button class="ai-btn" id="aiExport"><i class="fas fa-download"></i> Export PDF</button>
+            </div>
+        </div>
+
+        <!-- RIGHT: PREVIEW -->
+        <div class="preview-panel">
+            <div class="resume-preview">
+                <div id="previewContent"></div>
+                <div class="score-badge">
+                    <div id="score">0</div>
+                    <div class="score-label">Score</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MENU OVERLAY -->
+    <div id="menuOverlay" class="menu-overlay">
+        <div class="menu-sidebar">
+            <button class="close-menu" onclick="closeMenuOverlay()">&times;</button>
+            <div style="margin-top:32px; font-size:13px;">
+                <div style="font-size:11px; text-transform:uppercase; color:#6b7280; margin-bottom:6px;">Account</div>
+                <div class="menu-item" onclick="openProfile()">👤 Profile</div>
+                <div class="menu-item" onclick="showDashboard()">📊 Dashboard</div>
+                <div class="menu-item" onclick="showSubscriptions()">👑 Subscription</div>
+
+                <div style="font-size:11px; text-transform:uppercase; color:#6b7280; margin:14px 0 6px;">App</div>
+                <div class="menu-item" onclick="showTemplates()">📄 Templates</div>
+                <div class="menu-item" onclick="showSettings()">⚙️ Settings</div>
+                <div class="menu-item" onclick="showHelp()">💬 Help & Support</div>
+
+                <div class="menu-item" style="color:#fecaca;" onclick="logout()">🚪 Logout</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PROFILE MODAL -->
+    <div id="profileModal" class="profile-modal">
+        <div class="profile-panel">
+            <button class="close-menu" onclick="closeProfile()">&times;</button>
+            <div style="text-align:center; margin-bottom:18px;">
+                <div id="profileAvatar" style="width:72px; height:72px; border-radius:50%; margin:0 auto 8px;
+                     background:linear-gradient(135deg,#3b82f6,#6366f1); display:flex; align-items:center; justify-content:center;
+                     font-weight:800; font-size:26px; color:white;">
+                    JD
+                </div>
+                <div id="profileName" style="font-weight:700; font-size:16px;">John Doe</div>
+                <div id="profileEmail" style="font-size:12px; color:#9ca3af;">john@example.com</div>
+            </div>
+
+            <div style="margin-bottom:14px; padding-bottom:10px; border-bottom:1px solid #111827;">
+                <div class="form-group">
+                    <label class="label">Full Name</label>
+                    <input class="input" id="editName" placeholder="Your name">
+                </div>
+                <div class="form-group">
+                    <label class="label">Email</label>
+                    <input class="input" id="editEmail" type="email" placeholder="Email">
+                </div>
+                <div class="form-group">
+                    <label class="label">Phone</label>
+                    <input class="input" id="editPhone" placeholder="+91 XXXXX XXXXX">
+                </div>
+                <div class="form-group">
+                    <label class="label">Location</label>
+                    <input class="input" id="editLocation" placeholder="City, Country">
+                </div>
+                <button class="auth-btn" onclick="saveProfile()">Save Profile</button>
+            </div>
+
+            <div style="display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px;">
+                <div class="stat-card">
+                    <div class="stat-number" id="statResumes">0</div>
+                    <div class="stat-label">Resumes</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="statExports">0</div>
+                    <div class="stat-label">Exports</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="statPlan">FREE</div>
+                    <div class="stat-label">Plan</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- DASHBOARD MODAL -->
+    <div id="dashboardModal" class="profile-modal">
+        <div class="profile-panel" style="max-width:720px;">
+            <button class="close-menu" onclick="closeModal('dashboardModal')">&times;</button>
+            <h2 style="font-size:20px; font-weight:800; margin-bottom:6px;">📊 Dashboard</h2>
+            <p style="color:#9ca3af; font-size:12px; margin-bottom:14px;">
+                Quick snapshot of your usage and performance.
+            </p>
+            <div id="dashboardStats" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:10px;"></div>
+        </div>
+    </div>
+
+    <!-- SETTINGS MODAL -->
+    <div id="settingsModal" class="profile-modal">
+        <div class="profile-panel" style="max-width:520px;">
+            <button class="close-menu" onclick="closeModal('settingsModal')">&times;</button>
+            <h2 style="font-size:20px; font-weight:800; margin-bottom:6px;">⚙️ Settings</h2>
+            <p style="color:#9ca3af; font-size:12px; margin-bottom:14px;">
+                Appearance and layout preferences (saved in this browser).
+            </p>
+
+            <div style="margin-bottom:14px; padding-bottom:10px; border-bottom:1px solid #111827;">
+                <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+                    <div>
+                        <div style="font-size:13px; font-weight:600;">Compact preview mode</div>
+                        <div style="font-size:11px; color:#9ca3af;">Tighter spacing to fit more content.</div>
+                    </div>
+                    <label style="display:inline-flex; align-items:center; gap:6px; font-size:11px;">
+                        <input type="checkbox" id="settingCompact" onchange="toggleCompact()"> On
+                    </label>
+                </div>
+            </div>
+
+            <div style="margin-bottom:10px;">
+                <div style="font-size:13px; font-weight:600; margin-bottom:4px;">Theme</div>
+                <select class="input" id="settingTheme" onchange="changeTheme()">
+                    <option value="indigo">Indigo dark (default)</option>
+                    <option value="slate">Slate dark</option>
+                    <option value="light">Light white</option>
+                </select>
+            </div>
+
+            <div style="font-size:11px; color:#9ca3af; margin-top:8px;">
+                These settings are cosmetic only and do not change the exported PDF structure.
+            </div>
+        </div>
+    </div>
+
+    <!-- HELP MODAL -->
+    <div id="helpModal" class="profile-modal">
+        <div class="profile-panel" style="max-width:520px;">
+            <button class="close-menu" onclick="closeModal('helpModal')">&times;</button>
+            <h2 style="font-size:20px; font-weight:800; margin-bottom:6px;">💬 Help & Support</h2>
+            <p style="color:#9ca3af; font-size:12px; margin-bottom:14px;">
+                Use the built‑in AI assistant for quick tips, or email support for anything else.
+            </p>
+
+            <div style="background:rgba(37,99,235,0.18); border-radius:12px; padding:12px; margin-bottom:12px;">
+                <div style="font-size:13px; font-weight:600; margin-bottom:4px;">AI Career Assistant</div>
+                <div style="font-size:11px; color:#cbd5f5; margin-bottom:6px;">
+                    Ask questions about ATS, resume bullets, interview prep and more. The bubble is at the bottom‑right.
+                </div>
+                <button class="auth-btn" style="width:auto; padding:7px 12px; font-size:11px;" onclick="toggleChatWidget()">
+                    Open AI chat
+                </button>
+            </div>
+
+            <div style="background:rgba(16,185,129,0.15); border-radius:12px; padding:12px;">
+                <div style="font-size:13px; font-weight:600; margin-bottom:4px;">Email support</div>
+                <div style="font-size:11px; color:#a7f3d0; margin-bottom:6px;">
+                    For feature requests or bugs, send an email.
+                </div>
+                <div style="font-size:12px; font-weight:600; margin-bottom:6px;">support@airesumestudio.in</div>
+                <button class="auth-btn" style="width:auto; padding:7px 12px; font-size:11px;"
+                        onclick="navigator.clipboard.writeText('support@airesumestudio.in'); showToast('Support email copied!');">
+                    Copy email
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SUBSCRIPTION MODAL -->
+    <div id="subscriptionModal" class="profile-modal">
+        <div class="profile-panel" style="max-width:740px;">
+            <button class="close-menu" onclick="closeModal('subscriptionModal')">&times;</button>
+            <h2 style="font-size:20px; font-weight:800; margin-bottom:6px;">👑 Plans & Billing (INR)</h2>
+            <p style="color:#9ca3af; font-size:12px; margin-bottom:14px;">
+                This is a front‑end demo. No real payment is processed.
+            </p>
+
+            <div id="plansStep">
+                <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:10px;">
+                    <div class="stat-card" style="text-align:left;">
+                        <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.08em; color:#9ca3af;">Free</div>
+                        <div style="font-size:20px; font-weight:800;">₹0<span style="font-size:11px; font-weight:500;"> / month</span></div>
+                        <div style="font-size:11px; color:#9ca3af; margin:4px 0 8px;">For trying the builder.</div>
+                        <ul style="list-style:none; padding:0; margin:0 0 8px; font-size:11px; color:#9ca3af;">
+                            <li>• 1 active resume</li>
+                            <li>• TXT export</li>
+                            <li>• Basic AI tips</li>
+                        </ul>
+                        <button class="auth-btn" style="width:auto; padding:7px 12px; font-size:11px;"
+                                onclick="startCheckout('free',0)">Use Free</button>
+                    </div>
+
+                    <div class="stat-card" style="text-align:left; border-color:#22c55e;">
+                        <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.08em; color:#bbf7d0;">Student Pro</div>
+                        <div style="font-size:20px; font-weight:800;">₹199<span style="font-size:11px; font-weight:500;"> / month</span></div>
+                        <div style="font-size:11px; color:#9ca3af; margin:4px 0 8px;">For students & freshers.</div>
+                        <ul style="list-style:none; padding:0; margin:0 0 8px; font-size:11px; color:#9ca3af;">
+                            <li>• 3 active resumes</li>
+                            <li>• PDF export</li>
+                            <li>• AI analyze & format</li>
+                        </ul>
+                        <button class="auth-btn" style="width:auto; padding:7px 12px; font-size:11px; background:linear-gradient(135deg,#22c55e,#16a34a);"
+                                onclick="startCheckout('student',199)">Choose Student Pro</button>
+                    </div>
+
+                    <div class="stat-card" style="text-align:left;">
+                        <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.08em; color:#c4b5fd;">Career Pro</div>
+                        <div style="font-size:20px; font-weight:800;">₹499<span style="font-size:11px; font-weight:500;"> / month</span></div>
+                        <div style="font-size:11px; color:#9ca3af; margin:4px 0 8px;">For active job seekers.</div>
+                        <ul style="list-style:none; padding:0; margin:0 0 8px; font-size:11px; color:#9ca3af;">
+                            <li>• 10 active resumes</li>
+                            <li>• All AI tools</li>
+                            <li>• Priority support</li>
+                        </ul>
+                        <button class="auth-btn" style="width:auto; padding:7px 12px; font-size:11px; background:linear-gradient(135deg,#6366f1,#8b5cf6);"
+                                onclick="startCheckout('career',499)">Choose Career Pro</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="checkoutStep" style="display:none; margin-top:10px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                    <div>
+                        <div style="font-size:14px; font-weight:700;" id="checkoutPlanLabel">Plan</div>
+                        <div style="font-size:11px; color:#9ca3af;" id="checkoutPlanPrice"></div>
+                    </div>
+                    <button class="add-btn" style="width:auto; padding:6px 10px; font-size:11px;" onclick="backToPlans()">
+                        ← Back to plans
+                    </button>
+                </div>
+
+                <div style="display:grid; grid-template-columns:minmax(0,1.6fr) minmax(0,1.2fr); gap:10px;">
+                    <div>
+                        <div class="form-group">
+                            <label class="label">Full name</label>
+                            <input class="input" id="billName" placeholder="Your name on card">
+                        </div>
+                        <div class="form-group">
+                            <label class="label">Email</label>
+                            <input class="input" id="billEmail" placeholder="billing@example.com">
+                        </div>
+                        <div class="form-group">
+                            <label class="label">Phone</label>
+                            <input class="input" id="billPhone" placeholder="+91 XXXXX XXXXX">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="label">Card number (demo)</label>
+                            <input class="input" id="billCard" placeholder="4111 1111 1111 1111">
+                        </div>
+                        <div style="display:flex; gap:8px;">
+                            <div class="form-group" style="flex:1;">
+                                <label class="label">Expiry</label>
+                                <input class="input" id="billExp" placeholder="MM/YY">
+                            </div>
+                            <div class="form-group" style="flex:1;">
+                                <label class="label">CVV</label>
+                                <input class="input" id="billCvv" placeholder="123">
+                            </div>
+                        </div>
+
+                        <button class="auth-btn" style="margin-top:4px;" onclick="confirmCheckout()">
+                            Complete purchase (demo)
+                        </button>
+                        <div style="font-size:10px; color:#9ca3af; margin-top:6px;">
+                            No real transaction happens. This is a front‑end only example of a subscription flow in INR.
+                        </div>
+                    </div>
+
+                    <div class="stat-card" style="font-size:12px;">
+                        <div style="font-size:13px; font-weight:700; margin-bottom:6px;">Summary</div>
+                        <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                            <span>Subtotal</span><span id="sumSubtotal">₹0</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                            <span>GST (18%)</span><span id="sumGst">₹0</span>
+                        </div>
+                        <div style="border-top:1px solid #1f2937; margin:6px 0;"></div>
+                        <div style="display:flex; justify-content:space-between; font-weight:700;">
+                            <span>Total due today</span><span id="sumTotal">₹0</span>
+                        </div>
+                        <div style="font-size:10px; color:#9ca3af; margin-top:6px;">
+                            Subscription renews monthly. You can cancel anytime from Settings → Subscription (demo).
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FLOATING CHAT -->
+    <div class="chat-panel" id="chatPanel">
+        <div class="chat-header">
+            <div style="display:flex; align-items:center; gap:6px;">
+                <span style="width:22px; height:22px; border-radius:50%; background:linear-gradient(135deg,#3b82f6,#6366f1); display:flex; align-items:center; justify-content:center; color:white; font-size:11px;">AI</span>
+                <h3 style="font-size:13px; font-weight:700; margin:0;">AI Career Assistant</h3>
+            </div>
+            <button style="background:none; border:none; color:#9ca3af; font-size:18px; cursor:pointer;" onclick="toggleChatWidget()">&times;</button>
+        </div>
+        <div id="chatMessages"></div>
+        <div class="chat-input-area">
+            <input id="chatInput" type="text" placeholder="Ask anything about resume, ATS, or interviews...">
+            <button id="chatSend">Send</button>
+        </div>
+    </div>
+
+    <button id="chatFab">
+        <i class="fas fa-comments"></i>
+    </button>
+
+    <!-- SCRIPT GOES HERE -->
+   <script>
+    let currentMode = null;
+    let currentUser = null;
+    let currentPlan = 'free'; // free | student | career
+    let checkoutAmount = 0;
+
+    // ========= PROFILE =========
+    function openProfile() {
+        document.getElementById('menuOverlay').classList.remove('active');
+        loadProfileData();
+        document.getElementById('profileModal').classList.add('active');
+    }
+
+    function closeProfile() {
+        document.getElementById('profileModal').classList.remove('active');
+    }
+
+    function loadProfileData() {
+        const users = JSON.parse(localStorage.getItem('resumeUsers') || '{}');
+        const stats = JSON.parse(localStorage.getItem('userStats') || '{}');
+        const plan = localStorage.getItem('subscriptionPlan') || 'free';
+        const emailKey = localStorage.getItem('currentUser');
+        if (!emailKey || !users[emailKey]) return;
+        currentUser = users[emailKey];
+
+        const initials = currentUser.name.charAt(0) + (currentUser.name.split(' ')[1]?.charAt(0) || '');
+        document.getElementById('profileAvatar').textContent = initials;
+        document.getElementById('profileName').textContent = currentUser.name;
+        document.getElementById('profileEmail').textContent = currentUser.email;
+        document.getElementById('editName').value = currentUser.name;
+        document.getElementById('editEmail').value = currentUser.email;
+
+        document.getElementById('statResumes').textContent = stats.resumesCreated || 0;
+        document.getElementById('statExports').textContent = stats.exports || 0;
+        document.getElementById('statPlan').textContent = plan.toUpperCase();
+    }
+
+    function saveProfile() {
+        const name = document.getElementById('editName').value.trim();
+        const email = document.getElementById('editEmail').value.trim().toLowerCase();
+        const phone = document.getElementById('editPhone').value.trim();
+        const location = document.getElementById('editLocation').value.trim();
+
+        if (!name || !email) {
+            showToast('Name and email required!', true);
+            return;
+        }
+
+        const users = JSON.parse(localStorage.getItem('resumeUsers') || '{}');
+        const oldEmail = currentUser.email;
+        if (users[oldEmail]) {
+            delete users[oldEmail];
+        }
+        users[email] = { name, email, created: currentUser.created || new Date().toISOString() };
+        localStorage.setItem('resumeUsers', JSON.stringify(users));
+        localStorage.setItem('currentUser', email);
+        currentUser = users[email];
+
+        const profile = { phone, location, updated: new Date().toISOString() };
+        localStorage.setItem(`profile_${email}`, JSON.stringify(profile));
+
+        const initials = name.charAt(0) + (name.split(' ')[1]?.charAt(0) || '');
+        document.getElementById('menuBtn').textContent = initials;
+        showToast('Profile updated!');
+        closeProfile();
+    }
+
+    // ========= AUTH =========
+    function switchTab(tab) {
+        document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+        event.target.classList.add('active');
+        document.getElementById('loginForm').style.display = tab === 'login' ? 'block' : 'none';
+        document.getElementById('registerForm').style.display = tab === 'register' ? 'block' : 'none';
+    }
+
+    function handleRegister() {
+        const name = document.getElementById('regName').value.trim();
+        const email = document.getElementById('regEmail').value.trim().toLowerCase();
+        const password = document.getElementById('regPassword').value;
+
+        if (!name || !email || !password || password.length < 6) {
+            showToast('Please fill all fields (password 6+ chars)', true);
+            return;
+        }
+
+        const users = JSON.parse(localStorage.getItem('resumeUsers') || '{}');
+        if (users[email]) {
+            showToast('Account already exists. Please login.', true);
+            switchTab('login');
+            return;
+        }
+
+        users[email] = { name, email, created: new Date().toISOString() };
+        localStorage.setItem('resumeUsers', JSON.stringify(users));
+        localStorage.setItem('currentUser', email);
+        localStorage.setItem('userStats', JSON.stringify({ resumesCreated: 0, exports: 0 }));
+        localStorage.setItem('subscriptionPlan', 'free');
+
+        currentUser = users[email];
+        const initials = name.charAt(0) + (name.split(' ')[1]?.charAt(0) || '');
+        document.getElementById('menuBtn').textContent = initials;
+        showToast('Welcome! Account created.');
+        goToOnboarding();
+    }
+
+    function handleLogin() {
+        const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+        const users = JSON.parse(localStorage.getItem('resumeUsers') || '{}');
+
+        if (!users[email]) {
+            showToast('No account found. Please register.', true);
+            switchTab('register');
+            return;
+        }
+
+        currentUser = users[email];
+        localStorage.setItem('currentUser', email);
+        const initials = currentUser.name.charAt(0) + (currentUser.name.split(' ')[1]?.charAt(0) || '');
+        document.getElementById('menuBtn').textContent = initials;
+        showToast(`Welcome back, ${currentUser.name}!`);
+        goToOnboarding();
+    }
+
+    function goToOnboarding() {
+        document.getElementById('authScreen').style.display = 'none';
+        document.getElementById('onboarding').classList.add('active');
+    }
+
+    function logout() {
+        localStorage.removeItem('currentUser');
+        document.getElementById('appContainer').classList.remove('active');
+        document.getElementById('onboarding').classList.remove('active');
+        document.getElementById('authScreen').style.display = 'flex';
+        document.getElementById('menuOverlay').classList.remove('active');
+        showToast('Signed out.');
+        currentUser = null;
+        document.getElementById('menuBtn').textContent = 'JD';
+    }
+
+    // ========= MODE =========
+    function selectMode(mode) {
+        currentMode = mode;
+        document.getElementById('onboarding').classList.remove('active');
+        document.getElementById('appContainer').classList.add('active');
+        document.getElementById('modeIndicator').innerHTML = mode === 'student'
+            ? '🎓 Student / Fresher'
+            : '💼 Professional';
+        document.getElementById('editorTitle').innerHTML = mode === 'student'
+            ? '👤 Student Profile'
+            : '👤 Professional Profile';
+        document.getElementById('titleLabel').textContent = mode === 'student'
+            ? 'Target Role / Internship'
+            : 'Professional Title';
+        document.getElementById('studentGPA').style.display = mode === 'student' ? 'block' : 'none';
+
+        initApp();
+        updatePreview();
+    }
+
+    // ========= INIT APP =========
+    function initApp() {
+        document.getElementById('addSkill').onclick = () =>
+            addItem('skillsList', currentMode === 'student' ? 'Course / Project' : 'Skill');
+        document.getElementById('addExperience').onclick = () =>
+            addItem('experienceList', currentMode === 'student' ? 'Internship / Activity' : 'Job title');
+        document.getElementById('addCertificate').onclick = () =>
+            addItem('certList', 'Certificate name');
+        document.getElementById('addAchievement').onclick = () =>
+            addItem('achList', 'Achievement');
+
+        document.getElementById('menuBtn').onclick = () =>
+            document.getElementById('menuOverlay').classList.add('active');
+
+        document.getElementById('aiGenerate').onclick = aiGenerate;
+        document.getElementById('aiAnalyze').onclick = aiAnalyze;
+        document.getElementById('aiFormat').onclick = aiFormat;
+        document.getElementById('aiExport').onclick = exportPDF;
+
+        document.getElementById('chatSend').onclick = sendChatMessage;
+        document.getElementById('chatInput').addEventListener('keypress', e => {
+            if (e.key === 'Enter') sendChatMessage();
+        });
+
+        document.querySelectorAll('.input, .textarea').forEach(el =>
+            el.addEventListener('input', updatePreview)
+        );
+    }
+
+    // ========= LIST ITEMS =========
+    function addItem(containerId, placeholder) {
+        const container = document.getElementById(containerId);
+        const item = document.createElement('div');
+        item.className = 'item-card';
+        item.innerHTML = `
+            <div class="item-header">
+                <input class="item-title" placeholder="${placeholder}">
+                <button class="delete-btn"><i class="fas fa-times"></i></button>
+            </div>
+            <textarea class="textarea" rows="2" placeholder="Description..."></textarea>
+        `;
+        item.querySelector('.delete-btn').onclick = () => {
+            item.remove();
+            updatePreview();
+        };
+        item.querySelectorAll('input, textarea').forEach(el =>
+            el.addEventListener('input', updatePreview)
+        );
+        container.appendChild(item);
+        updatePreview();
+    }
+
+    // ========= PREVIEW =========
+    function updatePreview() {
+        const name = document.getElementById('name').value || 'Your Name';
+        const title = document.getElementById('title').value || (currentMode === 'student' ? 'Student' : 'Professional');
+        const gpa = document.getElementById('gpa')?.value || '';
+        const summary = document.getElementById('summary').value || '';
+
+        const email = document.getElementById('contactEmail')?.value || '';
+        const phone = document.getElementById('contactPhone')?.value || '';
+        const location = document.getElementById('contactLocation')?.value || '';
+        const github = document.getElementById('contactGithub')?.value || '';
+        const linkedin = document.getElementById('contactLinkedin')?.value || '';
+        const imgUrl = document.getElementById('profileImage')?.value || '';
+
+        const skills = Array.from(document.querySelectorAll('#skillsList .item-title'))
+            .map(i => i.value.trim()).filter(Boolean);
+        const experience = Array.from(document.querySelectorAll('#experienceList .item-card'))
+            .map(c => ({
+                title: c.querySelector('.item-title').value.trim(),
+                desc: c.querySelector('.textarea').value.trim()
+            })).filter(x => x.title);
+        const certificates = Array.from(document.querySelectorAll('#certList .item-card'))
+            .map(c => ({
+                title: c.querySelector('.item-title').value.trim(),
+                desc: c.querySelector('.textarea').value.trim()
+            })).filter(x => x.title);
+        const achievements = Array.from(document.querySelectorAll('#achList .item-card'))
+            .map(c => ({
+                title: c.querySelector('.item-title').value.trim(),
+                desc: c.querySelector('.textarea').value.trim()
+            })).filter(x => x.title);
+
+        const contactLines = [
+            phone && `<span>${phone}</span>`,
+            email && `<span>${email}</span>`,
+            location && `<span>${location}</span>`,
+            github && `<span>GitHub: ${github}</span>`,
+            linkedin && `<span>LinkedIn: ${linkedin}</span>`
+        ].filter(Boolean).join(' • ');
+
+        const preview = document.getElementById('previewContent');
+        preview.innerHTML = `
+            <div class="preview-header" style="display:flex; justify-content:space-between; gap:14px; align-items:flex-start;">
+                <div style="flex:1;">
+                    <div class="preview-name">${name}</div>
+                    <div class="preview-role">${title}</div>
+                    ${contactLines ? `<div style="font-size:10px; color:#4b5563; margin-top:4px;">${contactLines}</div>` : ''}
+                </div>
+                <div style="width:64px; height:64px; border-radius:50%; overflow:hidden; border:1px solid #e5e7eb; background:#e5e7eb;">
+                    ${imgUrl
+                        ? `<img src="${imgUrl}" style="width:100%; height:100%; object-fit:cover;" alt="Profile photo">`
+                        : `<div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-weight:700; color:#4b5563;">${name.charAt(0)}</div>`}
+                </div>
+            </div>
+
+            <div class="preview-section">
+                ${gpa && currentMode === 'student'
+                    ? `<div style="font-size:10px; color:#4b5563; font-weight:600; margin-bottom:3px;">GPA: ${gpa}</div>`
+                    : ''}
+                ${summary
+                    ? `<div style="font-size:10px; color:#4b5563; line-height:1.5;">${summary}</div>`
+                    : ''}
+            </div>
+
+            <div class="preview-section">
+                <h3>Skills & Projects</h3>
+                <div>${skills.map(s => `<span class="skill-tag">${s}</span>`).join('')}</div>
+            </div>
+
+            <div class="preview-section">
+                <h3>Experience</h3>
+                ${experience.length ? experience.map(exp => `
+                    <div class="preview-item">
+                        <div class="item-title-preview">${exp.title}</div>
+                        <div class="item-desc-preview">${exp.desc || 'Describe your impact, tools, and metrics.'}</div>
+                    </div>
+                `).join('') : '<div class="item-desc-preview">Add experience items on the left. They will appear here.</div>'}
+            </div>
+
+            ${certificates.length ? `
+            <div class="preview-section">
+                <h3>Certificates</h3>
+                ${certificates.map(c => `
+                    <div class="preview-item">
+                        <div class="item-title-preview">${c.title}</div>
+                        <div class="item-desc-preview">${c.desc || ''}</div>
+                    </div>
+                `).join('')}
+            </div>` : ''}
+
+            ${achievements.length ? `
+            <div class="preview-section">
+                <h3>Achievements</h3>
+                ${achievements.map(a => `
+                    <div class="preview-item">
+                        <div class="item-title-preview">${a.title}</div>
+                        <div class="item-desc-preview">${a.desc || ''}</div>
+                    </div>
+                `).join('')}
+            </div>` : ''}
+        `;
+
+        const stats = JSON.parse(localStorage.getItem('userStats') || '{}');
+        const score = Math.min(100,
+            20 +
+            (name.length > 5 ? 10 : 0) +
+            (title.length > 5 ? 10 : 0) +
+            (summary.length > 60 ? 15 : 0) +
+            (skills.length * 3) +
+            (experience.length * 8) +
+            (certificates.length * 3) +
+            (achievements.length * 4) +
+            (currentMode === 'student' && gpa ? 10 : 0)
+        );
+        const scoreEl = document.getElementById('score');
+        scoreEl.textContent = Math.round(score);
+        stats.lastScore = score;
+        localStorage.setItem('userStats', JSON.stringify(stats));
+    }
+
+    // ========= AI & EXPORT =========
+    function aiGenerate() {
+        if (!currentMode) return showToast('Select a mode first.', true);
+
+        showToast('Generating a sample resume...');
+        setTimeout(() => {
+            document.getElementById('name').value = currentMode === 'student' ? 'Aarav Sharma' : 'Priya Nair';
+            document.getElementById('title').value = currentMode === 'student'
+                ? 'B.Tech CSE Student – Software Engineering Intern'
+                : 'Senior Full Stack Engineer';
+            if (currentMode === 'student') {
+                document.getElementById('gpa').value = '8.7 / 10.0';
+            } else {
+                document.getElementById('gpa').value = '';
+            }
+            document.getElementById('contactEmail').value = 'you@example.com';
+            document.getElementById('contactPhone').value = '+91 98765 43210';
+            document.getElementById('contactLocation').value = 'Bengaluru, India';
+            document.getElementById('contactGithub').value = 'github.com/yourhandle';
+            document.getElementById('contactLinkedin').value = 'linkedin.com/in/yourhandle';
+
+            document.getElementById('summary').value = currentMode === 'student'
+                ? 'Final-year Computer Science student with strong fundamentals in data structures, algorithms and web development. Built multiple full‑stack projects and participated in national‑level hackathons. Seeking a software engineering internship in a product‑based company.'
+                : 'Senior full‑stack engineer with 7+ years of experience building scalable SaaS platforms. Expert in React, Node.js and cloud‑native architecture. Led cross‑functional teams, improved performance and delivered features used by thousands of users.';
+
+            document.getElementById('skillsList').innerHTML = '';
+            const skillArr = currentMode === 'student'
+                ? ['JavaScript', 'React', 'Node.js', 'MongoDB', 'Data Structures', 'Git', 'REST APIs']
+                : ['JavaScript / TypeScript', 'React / Next.js', 'Node.js / Express', 'PostgreSQL', 'AWS', 'Docker', 'System Design'];
+            skillArr.forEach(s => {
+                addItem('skillsList', s);
+                document.querySelector('#skillsList .item-card:last-child .item-title').value = s;
+            });
+
+            document.getElementById('experienceList').innerHTML = '';
+            const expArr = currentMode === 'student'
+                ? [
+                    { title: 'Software Engineering Intern – StartupX', desc: 'Built features in a React + Node.js app, fixed bugs, and improved page load times by 25% by optimising API calls.' },
+                    { title: 'Smart Attendance System – College Project', desc: 'Designed and implemented a face‑recognition based attendance system using Python and OpenCV, reducing manual work for faculty.' }
+                ]
+                : [
+                    { title: 'Senior Full Stack Engineer – SaaSCorp', desc: 'Led a team of 4 engineers to rebuild a legacy monolith into microservices on AWS, improving reliability and reducing infra cost by 30%.' },
+                    { title: 'Full Stack Engineer – FinTech Co.', desc: 'Delivered new onboarding flows using React and Node.js which increased activation rate by 18%.' }
+                ];
+            expArr.forEach(e => {
+                addItem('experienceList', e.title);
+                const last = document.querySelector('#experienceList .item-card:last-child');
+                last.querySelector('.textarea').value = e.desc;
+            });
+
+            document.getElementById('certList').innerHTML = '';
+            ['AWS Certified Cloud Practitioner', 'Google Data Analytics Certificate'].forEach(c => {
+                addItem('certList', c);
+                document.querySelector('#certList .item-card:last-child .item-title').value = c;
+            });
+
+            document.getElementById('achList').innerHTML = '';
+            ['Top 5% in LeetCode Weekly Contest', 'Winner – National Hackathon 2024'].forEach(a => {
+                addItem('achList', a);
+                document.querySelector('#achList .item-card:last-child .item-title').value = a;
+            });
+
+            const stats = JSON.parse(localStorage.getItem('userStats') || '{}');
+            stats.resumesCreated = (stats.resumesCreated || 0) + 1;
+            localStorage.setItem('userStats', JSON.stringify(stats));
+
+            updatePreview();
+            showToast('Sample content added. Customise it for your profile.');
+        }, 900);
+    }
+
+    function aiAnalyze() {
+        const stats = JSON.parse(localStorage.getItem('userStats') || '{}');
+        const score = parseInt(document.getElementById('score').textContent) || stats.lastScore || 0;
+        let msg;
+        if (score >= 90) {
+            msg = 'Excellent structure and content. You can still tailor keywords for each job and keep the document to one page if possible.';
+        } else if (score >= 75) {
+            msg = 'Good base. Add more metrics (numbers, percentages) in experience and ensure your skills match the job description.';
+        } else {
+            msg = 'Your resume needs work. Add a clear summary, at least 5–8 relevant skills, and rewrite experience bullets using action verbs + measurable impact.';
+        }
+        showToast(`ATS Score: ${score}/100\n${msg}`);
+    }
+
+    function aiFormat() {
+        showToast('Applying clean layout...');
+        setTimeout(() => {
+            updatePreview();
+            showToast('Layout refreshed.');
+        }, 600);
+    }
+
+    function exportPDF() {
+        const plan = localStorage.getItem('subscriptionPlan') || 'free';
+        if (plan === 'free') {
+            showToast('Upgrade to Student Pro or Career Pro to export PDF (demo restriction).', true);
+            return;
+        }
+
+        const name = document.getElementById('name').value || 'resume';
+        const element = document.getElementById('previewContent');
+        const opt = {
+            margin: 10,
+            filename: name.replace(/\s+/g, '_') + '_resume.pdf',
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2 },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+        html2pdf().set(opt).from(element).save();
+        showToast('PDF exported (check your downloads).');
+
+        const stats = JSON.parse(localStorage.getItem('userStats') || '{}');
+        stats.exports = (stats.exports || 0) + 1;
+        localStorage.setItem('userStats', JSON.stringify(stats));
+    }
+
+    // ========= DASHBOARD =========
+    function showDashboard() {
+        document.getElementById('menuOverlay').classList.remove('active');
+        const stats = JSON.parse(localStorage.getItem('userStats') || '{}');
+        const plan = localStorage.getItem('subscriptionPlan') || 'free';
+        const container = document.getElementById('dashboardStats');
+        container.innerHTML = `
+            <div class="stat-card">
+                <div class="stat-number">${stats.resumesCreated || 0}</div>
+                <div class="stat-label">Resumes created</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">${stats.exports || 0}</div>
+                <div class="stat-label">Exports</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">${stats.lastScore || 0}</div>
+                <div class="stat-label">Last ATS score</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">${plan.toUpperCase()}</div>
+                <div class="stat-label">Current plan</div>
+            </div>
+        `;
+        document.getElementById('dashboardModal').classList.add('active');
+    }
+
+    // ========= SETTINGS / HELP =========
+    function showSettings() {
+        document.getElementById('menuOverlay').classList.remove('active');
+        const compact = localStorage.getItem('settingCompact') === '1';
+        const theme = localStorage.getItem('settingTheme') || 'indigo';
+        document.getElementById('settingCompact').checked = compact;
+        document.getElementById('settingTheme').value = theme;
+        document.getElementById('settingsModal').classList.add('active');
+    }
+
+    function showHelp() {
+        document.getElementById('menuOverlay').classList.remove('active');
+        document.getElementById('helpModal').classList.add('active');
+    }
+
+    function toggleCompact() {
+        const enabled = document.getElementById('settingCompact').checked;
+        localStorage.setItem('settingCompact', enabled ? '1' : '0');
+        const preview = document.getElementById('previewContent');
+        preview.style.padding = enabled ? '24px 26px' : '32px 34px';
+        showToast(enabled ? 'Compact mode enabled.' : 'Compact mode disabled.');
+    }
+
+    function changeTheme() {
+        const theme = document.getElementById('settingTheme').value;
+        localStorage.setItem('settingTheme', theme);
+        if (theme === 'light') {
+            document.body.style.background = '#f3f4f6';
+        } else if (theme === 'slate') {
+            document.body.style.background = 'radial-gradient(circle at top,#020617 0,#020617 45%,#020617 100%)';
+        } else {
+            document.body.style.background = 'radial-gradient(circle at top left,#0f172a 0,#020617 45%,#111827 100%)';
+        }
+        showToast('Theme updated.');
+    }
+
+    // ========= SUBSCRIPTIONS (INR) =========
+    function showSubscriptions() {
+        document.getElementById('menuOverlay').classList.remove('active');
+        const plan = localStorage.getItem('subscriptionPlan') || 'free';
+        currentPlan = plan;
+        document.getElementById('plansStep').style.display = 'block';
+        document.getElementById('checkoutStep').style.display = 'none';
+        document.getElementById('subscriptionModal').classList.add('active');
+    }
+
+    function startCheckout(plan, amount) {
+        currentPlan = plan;
+        checkoutAmount = amount;
+
+        document.getElementById('plansStep').style.display = 'none';
+        document.getElementById('checkoutStep').style.display = 'block';
+
+        const labelMap = {
+            free: 'Free',
+            student: 'Student Pro',
+            career: 'Career Pro'
+        };
+        document.getElementById('checkoutPlanLabel').textContent = labelMap[plan] || 'Plan';
+        document.getElementById('checkoutPlanPrice').textContent = `₹${amount} / month`;
+
+        const gst = Math.round(amount * 0.18);
+        const total = amount + gst;
+        document.getElementById('sumSubtotal').textContent = '₹' + amount;
+        document.getElementById('sumGst').textContent = '₹' + gst;
+        document.getElementById('sumTotal').textContent = '₹' + total;
+    }
+
+    function backToPlans() {
+        document.getElementById('checkoutStep').style.display = 'none';
+        document.getElementById('plansStep').style.display = 'block';
+    }
+
+    function confirmCheckout() {
+        const name = document.getElementById('billName').value.trim();
+        const email = document.getElementById('billEmail').value.trim();
+        const phone = document.getElementById('billPhone').value.trim();
+
+        if (!name || !email || !phone) {
+            showToast('Fill name, email and phone to continue (demo).', true);
+            return;
+        }
+
+        localStorage.setItem('subscriptionPlan', currentPlan);
+        showToast(`Subscription updated to ${currentPlan.toUpperCase()} (demo – no real charge).`);
+        document.getElementById('subscriptionModal').classList.remove('active');
+        loadProfileData();
+    }
+
+    // ========= CHAT =========
+    function toggleChatWidget() {
+        const panel = document.getElementById('chatPanel');
+        panel.classList.toggle('active');
+    }
+
+    function sendChatMessage() {
+        const input = document.getElementById('chatInput');
+        const msg = input.value.trim();
+        if (!msg) return;
+
+        const box = document.getElementById('chatMessages');
+        box.innerHTML += `<div class="chat-message user">${msg}</div>`;
+        input.value = '';
+
+        setTimeout(() => {
+            const lower = msg.toLowerCase();
+            let reply;
+
+            if (lower.includes('ats')) {
+                reply = 'To pass ATS, keep a simple layout, use standard section titles (Summary, Experience, Skills, Education), and repeat keywords from the job description naturally in your bullets.';
+            } else if (lower.includes('summary')) {
+                reply = 'Write a 3–4 line summary: who you are (role and experience), 2–3 core skills, 1–2 numeric achievements, and what role or domain you are targeting.';
+            } else if (lower.includes('skills')) {
+                reply = 'Focus on 8–12 skills that match the job. Group them into categories like Languages, Frameworks, Tools and Cloud to keep them easy to scan.';
+            } else if (lower.includes('experience')) {
+                reply = 'Each bullet should follow: action verb + task + measurable result. Example: “Improved page load time by 35% by optimising API responses and reducing bundle size.”';
+            } else if (lower.includes('interview')) {
+                reply = 'Prepare 4–6 stories using the STAR method (Situation, Task, Action, Result). Practise answers for “Tell me about yourself”, strengths/weaknesses, and one big project.';
+            } else if (lower.includes('projects')) {
+                reply = 'Pick 2–4 projects that are closest to the role you want. For each, mention tech stack, key features, your specific contribution, and any results (users, performance, etc.).';
+            } else {
+                reply = 'This built‑in assistant works offline inside the page and cannot call real AI APIs, but it can share best‑practice tips on resumes, ATS, projects, and interviews. Try asking about: ATS, summary, skills, experience bullets, or interviews.';
+            }
+
+            box.innerHTML += `<div class="chat-message ai">${reply}</div>`;
+            box.scrollTop = box.scrollHeight;
+        }, 600);
+    }
+
+    // ========= MENU / MISC =========
+    function closeMenuOverlay() {
+        document.getElementById('menuOverlay').classList.remove('active');
+    }
+
+    function showTemplates() {
+        showToast('Template switching is visual only in this demo.');
+        document.getElementById('menuOverlay').classList.remove('active');
+    }
+
+    function closeModal(id) {
+        const m = document.getElementById(id);
+        if (m) m.classList.remove('active');
+    }
+
+    // ========= TOAST =========
+    function showToast(message, isError = false) {
+        const toast = document.createElement('div');
+        toast.style.cssText = `
+            position:fixed; top:18px; right:20px;
+            background:${isError ? '#b91c1c' : '#2563eb'};
+            color:white; padding:10px 14px;
+            border-radius:999px; font-size:12px;
+            font-weight:600; z-index:200;
+            transform:translateX(220px);
+            transition:transform .25s ease;
+            white-space:pre-line;
+        `;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.style.transform = 'translateX(0)', 30);
+        setTimeout(() => {
+            toast.style.transform = 'translateX(220px)';
+            setTimeout(() => toast.remove(), 240);
+        }, 3200);
+    }
+
+    // ========= RESTORE SESSION & FAB =========
+    window.addEventListener('load', () => {
+        const email = localStorage.getItem('currentUser');
+        const plan = localStorage.getItem('subscriptionPlan') || 'free';
+        currentPlan = plan;
+
+        if (email) {
+            const users = JSON.parse(localStorage.getItem('resumeUsers') || '{}');
+            if (users[email]) {
+                currentUser = users[email];
+                const initials = currentUser.name.charAt(0) + (currentUser.name.split(' ')[1]?.charAt(0) || '');
+                document.getElementById('menuBtn').textContent = initials;
+                document.getElementById('authScreen').style.display = 'none';
+                document.getElementById('onboarding').classList.add('active');
+            }
+        }
+
+        const compact = localStorage.getItem('settingCompact') === '1';
+        if (compact) {
+            document.getElementById('previewContent').style.padding = '24px 26px';
+        }
+        const theme = localStorage.getItem('settingTheme') || 'indigo';
+        if (theme === 'light') {
+            document.body.style.background = '#f3f4f6';
+        } else if (theme === 'slate') {
+            document.body.style.background = 'radial-gradient(circle at top,#020617 0,#020617 45%,#020617 100%)';
+        }
+
+        const fab = document.getElementById('chatFab');
+        if (fab) {
+            fab.addEventListener('click', () => {
+                document.getElementById('chatPanel').classList.add('active');
+            });
+        }
+    });
+
+    // Close profile/menu by background click
+    document.addEventListener('click', e => {
+        if (e.target.id === 'profileModal') closeProfile();
+        if (e.target.id === 'dashboardModal') closeModal('dashboardModal');
+        if (e.target.id === 'settingsModal') closeModal('settingsModal');
+        if (e.target.id === 'helpModal') closeModal('helpModal');
+        if (e.target.id === 'subscriptionModal') closeModal('subscriptionModal');
+        if (e.target.id === 'menuOverlay') closeMenuOverlay();
+    });
+</script>
+</body>
+</html>
